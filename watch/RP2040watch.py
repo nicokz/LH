@@ -1,4 +1,15 @@
-"""Raspberry Pi RP2040 watch development board with 1.28-inch GC9A01 round watch TFT display IMU on the board as a QMIC88658""" 
+"""
+===
+= RP2040 LCD 1.28 GC9A01 IMU, QMIC88658 MicroPython library
+===
+
+Type:      lib
+Author:    Nicholas Schreiner a.k.a. LighthunterWS
+Revision:  0.1.0 PA
+
+Hardware: Raspberry Pi RP2040 watch development board with 1.28-inch GC9A01 round watch TFT display IMU on the board as a QMIC88658
+
+""" 
 
 from machine import Pin,I2C,SPI,PWM,ADC
 import framebuf
