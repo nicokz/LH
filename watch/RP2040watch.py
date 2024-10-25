@@ -40,6 +40,10 @@ S3 = 16 # down/backward  0 0 0 1 0 1 1
 #  1.28-inch GC9A01 round watch TFT display driver
 #
 class GC9A01 (framebuf.FrameBuffer):
+    
+    """
+    Constructor
+    """  
     def __init__(self):
         self.width = 240
         self.height = 240
@@ -442,6 +446,47 @@ class GC9A01 (framebuf.FrameBuffer):
         self.spi.write(self.buffer)
         self.cs(1)
         
+    """
+    Display Brightness Wright (51H)
+    """
+    def brightness(self, dimm):
+        # dimm from 0x00 to 0xFF
+        self.write_cmd(0x51)
+        self.write_data(dimm)
+       
+    """
+    Display ON/OFF (29H, 28H)
+    """
+    def display(self,on):
+        if on:
+            self.write_cmd(0x29)  # Display ON (recovery after Display OFF, command 28h)
+        else:
+            self.write_cmd(0x28)  # Display OFF (command 28h) In this mode, the output from
+                                  # Frame Memory is disabled and blank page inserted.
+                                  # This command makes no change of contents of frame memory.
+                                  # This command does not change any other status.
+                                  # There will be no abnormal visible effect on the display.
+    """
+    Display Inversion ON/OFF (21H, 20H)
+    """
+    def invert(self,on):
+        if on:
+            self.write_cmd(0x21)  # Display Inversion ON
+                                  # This command is used to enter into display inversion mode.
+                                  # This command makes no change of the content of frame memory. Every bit is inverted from
+                                  # the frame memory to the display.
+                                  # This command doesn’t change any other status.
+                                  # To exit Display inversion mode, the Display inversion OFF command (20h) should be
+                                  # written.
+        else:
+            self.write_cmd(0x20)  # Display Inversion OFF
+                                  # This command is used to recover from display inversion mode.
+                                  # This command makes no change of the content of frame memory.
+                                  # This command doesn’t change any other status.
+        
+    """
+    Rotate screen
+    """  
     def orient(self, direction):
         # NORTH by default
         dfc_param = 0x00

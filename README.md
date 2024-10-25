@@ -2,7 +2,7 @@
 
 ## **Raspberry Pi RP2040 Watch**
 
-This is MicroPython experemental code for particular hardware (see. Introduction) based on Raspberry Pi RP2040 with GC9A01 and QMIC88658
+This is MicroPython experemental code for particular hardware (see, Introduction) based on Raspberry Pi RP2040 with GC9A01 and QMIC88658
 
 ## **Introduction**
 
@@ -26,7 +26,7 @@ Raspberry Pi RP2040 Watch code is released under the MIT License. See the **[LIC
 
 ## **Authors and Acknowledgment**
 
- was created by **Nicholas Screiner(https://github.com/nicokz)**.
+ was created by **Nicholas Schreiner(https://github.com/nicokz)**.
 
 Additional contributors include:
 
