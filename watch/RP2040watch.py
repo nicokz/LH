@@ -422,6 +422,24 @@ class GC9A01 (framebuf.FrameBuffer):
         self.spi.write(bytearray([buf]))
         self.cs(1)
         
+    
+    """ TOD: make universal write flexible arguments cmd and data"""
+    def write(self, cmd, data)
+        self.cs(1)
+        if cmd:
+            self.dc(0)
+            self.cs(0)
+            self.spi.write(bytearray([cmd]))
+            self.cs(1)
+        if data:
+            self.dc(1)
+            self.cs(0)
+            self.spi.write(bytearray([data]))
+        
+            
+        
+            
+        
     """
     Show content
     """
