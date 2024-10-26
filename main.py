@@ -129,7 +129,7 @@ LCD.loadRGB565background('/images/rp2040_bg.rgb565')
 #p = LCD.pixel(120,120)
 #print(f"pixel out     : {p:016b}")
 
-
+"""
 colors = [(0, 0, 255, "B"), (255, 0, 0, "R"), (0, 255, 0, "G"), (255, 255, 0, "Y")]  # Blue, Red, Green, Yellow
 
 rect_width = 20
@@ -144,10 +144,11 @@ for i, (r, g, b, t) in enumerate(colors):
     p_out = LCD.getPixel(120, 120+i * (rect_height + 5))
     print(f"Set pixel {i} to RGB({r}, {g}, {b}) - p {p_out:016b}, pixel out: {p_out:016b}")
 
-LCD.translucent_rect(130, 130, rect_width, (rect_height +5)*4, LCD.color(0,0,0), 0.50)
-
-LCD.translucent_rect(0, 100, 240, 40, LCD.color(0,0,0), 0.5)
-LCD.text("OPACITY",30,116,LCD.white)
+#LCD.translucent_rect(130, 130, rect_width, (rect_height +5)*4, LCD.color(0,0,0), 0.50)
+"""
+#LCD.translucent_rect(0, 100, 240, 40, LCD.color(0,0,0), 0.5)
+et = LCD.translucent_rect_optimized(0, 100, 240, 40, LCD.color(0,0,0), int(0.5 * 255))
+LCD.text(f"OPACITY in {et} ms",30,116,LCD.white)
 
 #with open('output.rgb565', 'rb') as f:
 #    pos = 0  # Position in framebuffer's buffer

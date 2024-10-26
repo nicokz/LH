@@ -669,6 +669,7 @@ class GC9A01 (framebuf.FrameBuffer):
     
     # Draw a translucent rectangle
     def translucent_rect(self, x, y, w, h, color, alpha):
+        start_time = time.ticks_ms() 
         for i in range(x, x + w):
             for j in range(y, y + h):
                 # Get the background color at (i, j)
@@ -677,6 +678,75 @@ class GC9A01 (framebuf.FrameBuffer):
                 blended_color = self.blend_colors(bg_color, color, alpha)
                 # Draw the blended color
                 self.setPixel(i, j, blended_color)
+        end_time = time.ticks_ms()  # End timing
+        elapsed_time = time.ticks_diff(end_time, start_time)  # Calculate the elapsed time
+        print("Time taken to draw translucent rectangle: {} ms".format(elapsed_time))
+        
+    @micropython.viper
+    def translucent_rect_optimized(self, x:int, y:int, w:int, h:int, color:int, alpha:int):
+        start_time = time.ticks_ms()  # Start timing
+        width = int(self.width)
+        buf = ptr8(self.buffer)
+        
+        # Color components for blending
+        r_color = (color >> 11) & 0x1F
+        g_color = (color >> 5) & 0x3F
+        b_color = color & 0x1F
+        
+        # Precompute alpha and inverse alpha for faster blending
+        inv_alpha = 255 - alpha
+        
+        # Calculate the blended colors for the rectangle
+        for i in range(w):
+            for j in range(h):
+                # Calculate the background pixel index
+                index = ((y + j) * width + (x + i)) * 2
+            
+                # Get the current background color
+                #bg_color = (self.buffer[index] << 8) | self.buffer[index + 1]
+                
+                # Extract the background color directly from the buffer
+                bg_color = (buf[index] << 8) | buf[index + 1]
+                
+                # Extract background color components
+                r_bg = (bg_color >> 11) & 0x1F
+                g_bg = (bg_color >> 5) & 0x3F
+                b_bg = bg_color & 0x1F
+                
+                # Blend color components using fixed-point math
+                blended_r = (r_bg * inv_alpha + r_color * alpha) >> 8
+                blended_g = (g_bg * inv_alpha + g_color * alpha) >> 8
+                blended_b = (b_bg * inv_alpha + b_color * alpha) >> 8
+                
+                # Manually clamp values within RGB565 limits
+                if blended_r < 0:
+                    blended_r = 0
+                elif blended_r > 31:
+                    blended_r = 31
+
+                if blended_g < 0:
+                    blended_g = 0
+                elif blended_g > 63:
+                    blended_g = 63
+
+                if blended_b < 0:
+                    blended_b = 0
+                elif blended_b > 31:
+                    blended_b = 31
+                    
+                # Create the new blended RGB565 color
+                blended_color = (int(blended_r) << 11) | (int(blended_g) << 5) | int(blended_b)
+
+                # Write the blended color back into the buffer
+                buf[index] = (blended_color >> 8) & 0xFF  # High byte
+                buf[index + 1] = blended_color & 0xFF      # Low byte
+    
+        end_time = time.ticks_ms()  # End timing
+        elapsed_time = time.ticks_diff(end_time, start_time)  # Calculate the elapsed time
+        print("Time taken to draw translucent rectangle (optimized): {} ms".format(elapsed_time))
+        return elapsed_time
+
+        
         
 if __name__=='__main__':
     LCD = GC9A01()
