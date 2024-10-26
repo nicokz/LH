@@ -115,18 +115,52 @@ LCD.fill_rect(0,0,240,40,LCD.red)
 LCD.text("RP2040 LCD 1.28",60,25,LCD.green)
 LCD.text("GC9A01 COMMANDS TESTS",30,116,LCD.white)
 LCD.show()
-with open('output.rgb565', 'rb') as f:
-    pos = 0  # Position in framebuffer's buffer
-    chunk_size = 1024  # Adjust chunk size as needed for memory efficiency
-    while pos < len(LCD.buffer):
-        chunk = f.read(chunk_size)
-        if not chunk:  # End of file
-            break
-        LCD.buffer[pos:pos+len(chunk)] = chunk
-        pos += len(chunk)
+LCD.fill(LCD.black)
+LCD.loadRGB565background('/images/rp2040_bg.rgb565')
+
+#p = LCD.pixel(126,56)
+#r,g,b = LCD.rgb565_to_rgb888(p)
+#print(f"RGB888: ({r}, {g}, {b})") 
+#print(f"pixel original: {p:016b}")
+
+#p = LCD.color(0,0,255)
+#LCD.fill_rect(0, 104, 240, 32, LCD.color(0,0,255))
+#print(f"pixel in      : {p:016b}")
+#p = LCD.pixel(120,120)
+#print(f"pixel out     : {p:016b}")
+
+
+colors = [(0, 0, 255, "B"), (255, 0, 0, "R"), (0, 255, 0, "G"), (255, 255, 0, "Y")]  # Blue, Red, Green, Yellow
+
+rect_width = 20
+rect_height = 20
+
+for i, (r, g, b, t) in enumerate(colors):
+    p = LCD.color(r, g, b)
+    LCD.fill_rectangle(120, 120 + i * (rect_height + 5), rect_width, rect_height, p)
+    LCD.text(t,110, 120 + i * (rect_height + 5),LCD.white)
+    # Read back and confirm color for the top-left pixel of the rectangle
+    #LCD.pixel(120, 120 + i, LCD.color(r,g,b))  # Set different colors to different pixels
+    p_out = LCD.getPixel(120, 120+i * (rect_height + 5))
+    print(f"Set pixel {i} to RGB({r}, {g}, {b}) - p {p_out:016b}, pixel out: {p_out:016b}")
+
+LCD.translucent_rect(130, 130, rect_width, (rect_height +5)*4, LCD.color(0,0,0), 0.50)
+
+LCD.translucent_rect(0, 100, 240, 40, LCD.color(0,0,0), 0.5)
+LCD.text("OPACITY",30,116,LCD.white)
+
+#with open('output.rgb565', 'rb') as f:
+#    pos = 0  # Position in framebuffer's buffer
+#    chunk_size = 1024  # Adjust chunk size as needed for memory efficiency
+#    while pos < len(LCD.buffer):
+#        chunk = f.read(chunk_size)
+#        if not chunk:  # End of file
+#            break
+#        LCD.buffer[pos:pos+len(chunk)] = chunk
+#        pos += len(chunk)
         
 LCD.show()
-time.sleep(15)
+ 
 #test01_screen_orientation()
 #time.sleep(5)
 #test2_display_brightness(0.1)

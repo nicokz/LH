@@ -16,6 +16,12 @@ This is MicroPython experemental code for particular hardware (see, Introduction
 
 [TBD]
 
+### *** New functions ***
+
+Using opacity effects on full-color screens can add a cool visual touch, but implementing it with MicroPython's FrameBuffer and RGB565 format comes with challenges.
+
+The default pixel() function in FrameBuffer doesn’t interpret colors consistently, so custom functions, setPixel() and getPixel(), were created to ensure accurate color handling. Additionally, a universal color() function was added to work as an interpreter for 16-bit RGB565 color formats. This setup also includes opacity functions to enable smooth blending effects on the screen.
+
 ## **Contributing**
 
 [TBD]

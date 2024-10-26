@@ -24,6 +24,18 @@ RST = 12
 
 BL = 25
 
+
+#Keys
+S1 = 17
+S2 = 18
+S3 = 16
+
+
+I2C_SDA = 6
+I2C_SDL = 7
+
+Vbat_Pin = 29
+
 # Orientation
 NORTH = 0
 EAST = 1
@@ -423,8 +435,8 @@ class GC9A01 (framebuf.FrameBuffer):
         self.cs(1)
         
     
-    """ TOD: make universal write flexible arguments cmd and data"""
-    def write(self, cmd, data)
+    """ TODO: make universal write flexible arguments cmd and data"""
+    def _write(self, cmd, data):
         self.cs(1)
         if cmd:
             self.dc(0)
@@ -434,11 +446,7 @@ class GC9A01 (framebuf.FrameBuffer):
         if data:
             self.dc(1)
             self.cs(0)
-            self.spi.write(bytearray([data]))
-        
-            
-        
-            
+            self.spi.write(bytearray([data])) 
         
     """
     Show content
@@ -553,8 +561,122 @@ class GC9A01 (framebuf.FrameBuffer):
                                # +-------- MY  Row Address Order
                                #
                                # MY, MX, MV - These 3 bits control MCU to memory write/read direction.
-                                                              
-                               
+
+    """
+    Load 16bit color image as background to FrameBuffer from binary file
+    Note 1: 16bit color JPG or PNG file (convert in GIMP from 8bit to 16bit if necessary)
+            must be converted into RGB565 binary file (use PIL or similar)
+    Note 2: background size is 240x240 pixels
+    Note 3: function loads file as is to FrameBuffer's buffer as is, all bugs are bugs in
+            image preparation process (see, Note 1 and Note 2)
+    """
+    def loadRGB565background(self,file_name):
+        with open(file_name, 'rb') as f:
+            pos = 0  # Position in framebuffer's buffer
+            chunk_size = 1024  # Adjust chunk size as needed for memory efficiency
+            while pos < len(self.buffer):
+                chunk = f.read(chunk_size)
+                if not chunk:  # End of file
+                    break
+                self.buffer[pos:pos+len(chunk)] = chunk
+                pos += len(chunk)
+                
+    """
+    Set of function for blending colors
+    Goal: translucent foregraound graphical elements. Cool staff!!!
+    """
+    
+    # Function to blend two RGB565 colors
+    # Note: failed, produces garbage (incorrect colors adjustment)
+    #def blend_colors(self, bg_color, fg_color, opacity):
+    #    # Extract RGB components from 16-bit colors
+    #    bg_r = (bg_color >> 11) & 0x1F
+    #    bg_g = (bg_color >> 5) & 0x3F
+    #    bg_b = bg_color & 0x1F
+    #    fg_r = (fg_color >> 11) & 0x1F
+    #    fg_g = (fg_color >> 5) & 0x3F
+    #    fg_b = fg_color & 0x1F
+    #    # Blend each component
+    #   new_r = int(bg_r * (1 - opacity) + fg_r * opacity)
+    #    new_g = int(bg_g * (1 - opacity) + fg_g * opacity)
+    #    new_b = int(bg_b * (1 - opacity) + fg_b * opacity)
+    #    # Return the new RGB565 color
+    #    return (new_r << 11) | (new_g << 5) | new_b
+    
+    """
+    convert standard RGB(255,255,255) into RGB565 16bits format
+    """
+    def color(self, red, green, blue):
+        # red, green and blue are 8 bits in range [0..255]
+        #goal: scale red 8 bits to 5 bits
+        #      scale green 8 bits to 6 bits
+        #      scale blue 8 bits to 5 bits
+        r_5 = red >> 3      # Scale red to 5 bits
+        g_6 = green >> 2      # Scale green to 6 bits
+        b_5 = blue >> 3      # Scale blue to 5 bits
+        # Combine into a single 16-bit value
+        return (r_5 << 11) | (g_6 << 5) | b_5
+        #return (b_5 << 11) | (r_5 << 5) | g_6
+        #return (r_5 << 11) | (b_5 << 5) | g_6
+        #return (b_5 << 11) | (g_6 << 5) | r_5
+    
+    def rgb565_to_rgb888(self, rgb565):
+        # Extract red, green, and blue components
+        r = (rgb565 >> 11) & 0x1F  # Red component (5 bits)
+        g = (rgb565 >> 5) & 0x3F   # Green component (6 bits)
+        b = rgb565 & 0x1F          # Blue component (5 bits)
+    
+        # Scale to 8 bits
+        r_8 = (r * 255) // 31  # Scale red
+        g_8 = (g * 255) // 63  # Scale green
+        b_8 = (b * 255) // 31  # Scale blue
+    
+        return r_8, g_8, b_8
+    
+    def setPixel(self,x,y, color):
+        index = (y * self.width + x) * 2  # Calculate the byte index in the buffer
+        self.buffer[index] = color >> 8  # High byte of RGB565
+        self.buffer[index + 1] = color & 0xFF  # Low byte of RGB565
+        
+    def getPixel(self,x,y):
+        index = (y * self.width + x) * 2  # Calculate the index in the framebuffer
+        return (self.buffer[index] << 8) | self.buffer[index + 1]
+    
+    def fill_rectangle(self, x, y, width, height, color):
+        for row in range(y, y + height):
+            for col in range(x, x + width):
+                self.setPixel(col, row, color)
+    
+    def blend_colors(self, bg_color, fg_color, alpha):
+        # Extract RGB components from RGB565 (scale to 8 bits)
+        bg_r = ((bg_color >> 11) & 0x1F) * 255 // 31
+        bg_g = ((bg_color >> 5) & 0x3F) * 255 // 63
+        bg_b = (bg_color & 0x1F) * 255 // 31
+
+        fg_r = ((fg_color >> 11) & 0x1F) * 255 // 31
+        fg_g = ((fg_color >> 5) & 0x3F) * 255 // 63
+        fg_b = (fg_color & 0x1F) * 255 // 31
+
+        # Blend each channel with floating-point precision
+        blend_r = round(fg_r * alpha + bg_r * (1 - alpha))
+        blend_g = round(fg_g * alpha + bg_g * (1 - alpha))
+        blend_b = round(fg_b * alpha + bg_b * (1 - alpha))
+
+        # Convert back to RGB565 with careful rounding
+        blend_rgb565 = ((blend_r * 31 // 255) << 11) | ((blend_g * 63 // 255) << 5) | (blend_b * 31 // 255)
+        return blend_rgb565
+
+    
+    # Draw a translucent rectangle
+    def translucent_rect(self, x, y, w, h, color, alpha):
+        for i in range(x, x + w):
+            for j in range(y, y + h):
+                # Get the background color at (i, j)
+                bg_color = self.getPixel(i, j)
+                # Blend it with the rectangle color
+                blended_color = self.blend_colors(bg_color, color, alpha)
+                # Draw the blended color
+                self.setPixel(i, j, blended_color)
         
 if __name__=='__main__':
     LCD = GC9A01()
