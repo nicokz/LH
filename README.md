@@ -4,6 +4,8 @@
 
 This is MicroPython experemental code for particular hardware (see, Introduction) based on Raspberry Pi RP2040 with GC9A01 and QMIC88658
 
+![Full color TFT screen](https://github.com/nicokz/LH/blob/master/docs/img/rp2040-w-color_bg.jpg)
+
 ## **Introduction**
 
 [TBD]
