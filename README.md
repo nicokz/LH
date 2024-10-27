@@ -26,9 +26,9 @@ Using opacity effects on full-color screens can add a visually striking element,
 
 The default `pixel()` function in FrameBuffer often leads to inconsistent color representation, prompting the creation of custom functions—`setPixel()` and `getPixel()`—to ensure accurate color handling. Additionally, a universal `color()` function has been introduced to interpret 16-bit RGB565 color formats effectively. This setup also incorporates opacity functions that enable smooth blending effects on the screen, elevating the visual experience of your smartwatch.
 
-### ***architecture and Programming Strategy***
+### ***Architecture and Programming Strategy***
 
-**"while True"** vs **THreading** buttons control
+**"while True"** vs **Threading** buttons control
 
 1. **CPU** Usage
 
