@@ -36,6 +36,7 @@ The default `pixel()` function in FrameBuffer often leads to inconsistent color 
 - CPU Load: Higher because the CPU spends more time actively in the button-monitoring loop.
 - Latency: Button checks are very fast and have minimal latency.
 - Efficiency: Good for time-sensitive applications that prioritize real-time button monitoring over multitasking.
+
 **uasyncio version**: With uasyncio, we achieve cooperative multitasking by yielding control with await asyncio.sleep(). This lets other tasks run while the button state check “waits” briefly.
 - CPU Load: Lower because it doesn’t block the CPU continuously in a loop. Other tasks can be performed during await periods, reducing the need for continuous polling.
 - Latency: Slightly higher than the while True loop, since it depends on the await asyncio.sleep() delay. However, this is often negligible unless the delay is long.
@@ -46,6 +47,7 @@ The default `pixel()` function in FrameBuffer often leads to inconsistent color 
 **while True loop**: This version uses minimal memory because it only needs a few variables and no additional overhead for task management.
 - Memory Footprint: Minimal, as it relies on direct calls and simple control flow.
 - Scalability: Can become harder to manage as additional features are added since each new feature would be managed within the same while True loop, which could get messy.
+
 **uasyncio version**: The use of uasyncio introduces some additional memory overhead, particularly for the coroutine management and the event loop.
 - Memory Footprint: Higher than while True due to the extra structures created by uasyncio, such as task management and stack frames for each async function.
 - Scalability: Much better, as you can add more asyncio tasks to perform other background tasks without overcomplicating the main loop.
