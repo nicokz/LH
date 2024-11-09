@@ -106,7 +106,7 @@ if __name__=='__main__':
     screen.show()
 ```
 ### **3. Sleep Mode and RTC Example**
-Demonstrates low-power sleep mode and the use of the RTC. The device can switch between sleep and wake-up mode by pressing **S1**.
+Demonstrates low-power sleep mode and the use of the RTC. The device can switch between sleep and wake-up mode by pressing **S1**. 
 
 ```python
 from watch.RP2040watch import GC9A01 as Screen
@@ -130,8 +130,10 @@ def wake_up(pin):
         screen.sleep_mode(True)
         isSleeping = True
     # Optional: Implement smooth dimming and more...
-
+...
 ```
+
+Full code is in **/examples/sleep_mode_and_rtc.py**
 
 ### **4. Sprite Animation with Gyroscope Example**
 In this example, the sprite is moved based on data from the QMI8658 gyroscope. The IMU readings control the sprite's direction, creating interactive motion-based control.
@@ -157,8 +159,10 @@ while True:
         sprite.draw()
         screen.show()
         sprite.move(stepX, stepY)
+...
 
 ```
+Full code is in **/examples/sprite_and_gyro.py**
 
 ### **Additional Notes**
 - **Utilities**: The /utils directory provides scripts for converting images to RGB565 and RGBA565 formats for efficient display usage and fonts generation scripts.
